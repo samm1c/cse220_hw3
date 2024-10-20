@@ -5,7 +5,6 @@ Image *load_image(char *filename) {
 
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) { // no file found
-        fclose(fp);
         return NULL;
     }
 
@@ -30,8 +29,12 @@ Image *load_image(char *filename) {
     fscanf(fp, " %*[^\n]");
     fscanf(fp, " %c", &intensity);
     
-    unsigned int **pixels = malloc(width * height * sizeof(int)); // create dynamic array by malloc'ing
+    unsigned int **pixels = malloc(height * sizeof(unsigned int *)); // create dynamic array by malloc'ing
+    for (unsigned int i = 0; i < height; i++) { // malloc per row
+        pixels[i] = malloc(width * sizeof(unsigned int));
+    }
     unsigned int i = 0, j = 0, k = 0; // stores R G B 
+
     for (unsigned int p = 0; p < height; p++) { // p -> pixels array index
         for (unsigned int q = 0; q < width; q++) {
             fscanf(fp, "%u %u %u", &i, &j, &k);

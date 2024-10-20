@@ -1,5 +1,6 @@
 #include "qtree.h"
 
+// part 2
 QTNode *create_quadtree(Image *image, double max_rmse) {
     (void)image;
     (void)max_rmse;

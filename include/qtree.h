@@ -13,6 +13,7 @@ typedef struct QTNode {
     char placeholder[1];  // This is a placeholder. You should not use this struct.    
 } QTNode;
 
+// part 2
 QTNode *create_quadtree(Image *image, double max_rmse);  
 QTNode *get_child1(QTNode *node);
 QTNode *get_child2(QTNode *node);
