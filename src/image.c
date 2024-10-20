@@ -1,31 +1,80 @@
 #include "image.h"
 
-Image *load_image(char *filename) {    
-    (void)filename;
-    return NULL;
+// part 1
+Image *load_image(char *filename) {
+
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL) { // no file found
+        fclose(fp);
+        return NULL;
+    }
+
+    char format[3]; // buffer for P3, +1 for null char
+    fscanf(fp, "%2s", format); // P3
+    // if (strcmp(format, "P3") != 0) { // NOT P3
+    //     fclose(fp);
+    //     return NULL;
+    // }
+
+    fscanf(fp, " %*[^\n]"); // skip extra characters and the new line
+    char line[100]; // char array buffer to store second line
+    fgets(line, sizeof(line), fp);
+    while (line[0] == '#') { // comment detected! -> skip lines
+        fscanf(fp, " %*[^\n]");
+        fgets(line, sizeof(line), fp);
+    }
+
+    unsigned int width = 0, height = 0;
+    unsigned char intensity = 0;
+    fscanf(fp, "%u %u", &width, &height);
+    fscanf(fp, " %*[^\n]");
+    fscanf(fp, " %c", &intensity);
+    
+    unsigned int **pixels = malloc(width * height * sizeof(int)); // create dynamic array by malloc'ing
+    unsigned int i = 0, j = 0, k = 0; // stores R G B 
+    for (unsigned int p = 0; p < height; p++) { // p -> pixels array index
+        for (unsigned int q = 0; q < width; q++) {
+            fscanf(fp, "%u %u %u", &i, &j, &k);
+            pixels[p][q] = i; // still dereferences pixels; same as *(pixels + p) but syntactic sugar
+            fscanf(fp, " %*[^\n]"); // skip any spaces or newlines
+        }
+        
+    }
+
+    fclose(fp);
+    Image *img = malloc(sizeof(Image));
+    img->width = width;
+    img->height = height;
+    img->pixels = pixels;
+    return img;
 }
 
 void delete_image(Image *image) {
-    (void)image;
-}
-
-unsigned short get_image_width(Image *image) {
-    (void)image;
-    return 0;
-}
-
-unsigned short get_image_height(Image *image) {
-    (void)image;
-    return 0;
+    if (image != NULL) { // make sure image actually exists first
+        for (unsigned int i = 0; i < (image->height); i++) {// deallocate the 2D array memory
+            free(image->pixels[i]);
+        }
+        free(image->pixels); 
+        image->pixels = NULL; // pixels officially point to nothing
+        free(image); // free object
+    }
 }
 
 unsigned char get_image_intensity(Image *image, unsigned int row, unsigned int col) {
-    (void)image;
-    (void)row;
-    (void)col;
-    return 0;
+    return image->pixels[row][col];
 }
 
+unsigned short get_image_width(Image *image) {
+    return image->width;
+}
+
+unsigned short get_image_height(Image *image) {
+    return image->height;
+}
+
+
+
+// part 2
 unsigned int hide_message(char *message, char *input_filename, char *output_filename) {
     (void)message;
     (void)input_filename;

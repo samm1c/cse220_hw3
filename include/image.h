@@ -8,15 +8,20 @@
 #define ERROR(...) do {fprintf(stderr, "[          ] [ ERR  ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); fflush(stderr);} while(0) 
 
 typedef struct Image {
-    char placeholder[1];  // This is a placeholder. You should not use this struct.
+    unsigned int width;
+    unsigned int height;
+    unsigned char intensity;
+    unsigned int **pixels; // dynamic array of/pointer to pixels
 } Image;
 
+// function prototypes for part 1
 Image *load_image(char *filename);
 void delete_image(Image *image);
 unsigned char get_image_intensity(Image *image, unsigned int row, unsigned int col);
 unsigned short get_image_width(Image *image);
 unsigned short get_image_height(Image *image);
 
+// part 2
 unsigned int hide_message(char *message, char *input_filename, char *output_filename);
 char *reveal_message(char *input_filename);
 unsigned int hide_image(char *secret_image_filename, char *input_filename, char *output_filename);
