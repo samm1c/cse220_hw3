@@ -20,7 +20,7 @@
         // skip comment(s)
         char line[256]; // char array buffer to store second line
         fgets(line, sizeof(line), fp);
-        while (fgets(line, sizeof(line), fp);) { // comment detected! -> skip lines
+        while (fgets(line, sizeof(line), fp)) { // comment detected! -> skip lines
             if (line[0] != '#') {
                 break;
             }
