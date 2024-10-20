@@ -13,18 +13,18 @@ Image *load_image(char *filename) {
     
     // skip comment(s) -> store width and height
     unsigned int width = 0, height = 0;
-    while (1) { // loop will break by itself
-        char line[256]; // char array buffer to store second line
-        fgets(line, sizeof(line), fp);
-        if (line[0] != '#') {
-            continue; // keep skipping comment lines
-        } else {
-            if (sscanf(line, "%u %u ", &width, &height) == 2) { // successfully stored 2 items
-                break;
-            }
-        }
-    }
-
+    // while (1) { // loop will break by itself
+    //     char line[256]; // char array buffer to store second line
+    //     fgets(line, sizeof(line), fp);
+    //     if (line[0] != '#') {
+    //         continue; // keep skipping comment lines
+    //     } else {
+    //         if (sscanf(line, "%u %u ", &width, &height) == 2) { // successfully stored 2 items
+    //             break;
+    //         }
+    //     }
+    // }
+    fscanf(fp, "%u %u", &width, &height);
     // store max intensity
     unsigned char intensity = 0;
     fscanf(fp, "%c ", &intensity);
