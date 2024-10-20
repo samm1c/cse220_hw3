@@ -19,7 +19,7 @@ Image *load_image(char *filename) {
         if (line[0] != '#') {
             continue; // keep skipping comment lines
         } else {
-            if (fscanf(fp, "%u %u ", &width, &height) == 2) { // successfully stored 2 items
+            if (sscanf(line, "%u %u ", &width, &height) == 2) { // successfully stored 2 items
                 break;
             }
         }
