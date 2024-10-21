@@ -40,12 +40,24 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
     //printf("row: %u, col: %u, height: %u, width: %u\n", r, c, h, w);
     //printf("Average: %f, RMSE: %f\n", average, RMSE);
     
-    if (RMSE <= max_rmse || h == 1 || w == 1) { // base case -> leaf node
+    if (RMSE <= max_rmse || (h == 1 && w == 1)) { // base case -> leaf node
         //printf("leaf node!\n");
         for (int i = 0; i < 4; i++) {
             root->children[i] = NULL;
         }
-    } else { // error is greater than necessary -> bad -> split the node -> 4 children 
+    } else if (h == 1) { // single row -> child 3 and 4 NULL
+        unsigned int half_w = w / 2; // single horizontal row -> split width in half, keep height of 1
+        (root->children[0]) = create_quadtree_helper(image, r, c, h, half_w, max_rmse);
+        (root->children[1]) = create_quadtree_helper(image, r, c, h, half_w, max_rmse);
+        (root->children[2]) = NULL;
+        (root->children[3]) = NULL;
+    } else if (w == 1) { // single column -> child 2 and 4 NULL
+        unsigned int half_h = h / 2;
+        (root->children[0]) = create_quadtree_helper(image, r, c, half_h, w, max_rmse);;
+        (root->children[1]) = NULL;
+        (root->children[2]) = create_quadtree_helper(image, r, c, half_h, w, max_rmse);;
+        (root->children[3]) = NULL;
+    } else { // error is greater than necessary -> bad -> split the node -> normal 4 children 
         // variables just to make life easier
         unsigned int half_h = h / 2;
         unsigned int half_w = w / 2;
