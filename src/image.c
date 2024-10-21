@@ -40,10 +40,10 @@ Image *load_image(char *filename) {
     for (unsigned int p = 0; p < height; p++) { // p -> pixels array index
         for (unsigned int q = 0; q < width; q++) {
             fscanf(fp, "%u %u %u ", &r, &g, &b);
-            printf("%u ", r);
+            //printf("%u ", r);
             pixels[p][q] = r; // still dereferences pixels; same as *(pixels + p) but syntactic sugar
         }
-        printf("\n");
+        //printf("\n");
     }
 
     fclose(fp);

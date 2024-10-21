@@ -10,7 +10,12 @@
 #define ERROR(...) do {fprintf(stderr, "[          ] [ ERR  ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); fflush(stderr);} while(0) 
 
 typedef struct QTNode {
-    char placeholder[1];  // This is a placeholder. You should not use this struct.    
+    unsigned char intensity; // average intensity
+    unsigned int row; // starting row
+    unsigned int col; // starting col
+    unsigned int height;
+    unsigned int width;
+    struct QTNode *children[4];
 } QTNode;
 
 // part 2
