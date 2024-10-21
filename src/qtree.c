@@ -46,7 +46,6 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
         // variables just to make life easier
         unsigned int half_h = h / 2;
         unsigned int half_w = w / 2;
-        
         (root->children[0]) = create_quadtree_helper(image, r, c, half_h, half_w, max_rmse);
         (root->children[1]) = create_quadtree_helper(image, r, c + half_w, half_h, half_w, max_rmse);
         (root->children[2]) = create_quadtree_helper(image, r + half_h, c, half_h, half_w, max_rmse);
@@ -56,32 +55,34 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
 }
 
 QTNode *get_child1(QTNode *node) {
-    (void)node;
     return node->children[0];
 }
 
 QTNode *get_child2(QTNode *node) {
-    (void)node;
     return node->children[1];
 }
 
 QTNode *get_child3(QTNode *node) {
-    (void)node;
     return node->children[2];
 }
 
 QTNode *get_child4(QTNode *node) {
-    (void)node;
     return node->children[3];
 }
 
 unsigned char get_node_intensity(QTNode *node) {
-    (void)node;
     return node->intensity;
 }
 
 void delete_quadtree(QTNode *root) {
-    (void)root;
+    if (root == NULL) { // base case
+        return;
+    } else {
+        for (int i = 0; i < 4; i++) { // must recursively free up children b/c you don't know how big the tree is
+            delete_quadtree(root->children[i]);
+        }
+        free(root);
+    }
 }
 
 void save_qtree_as_ppm(QTNode *root, char *filename) {
