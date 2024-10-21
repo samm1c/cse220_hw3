@@ -79,7 +79,10 @@ void delete_quadtree(QTNode *root) {
         return;
     } else {
         for (int i = 0; i < 4; i++) { // must recursively free up children b/c you don't know how big the tree is
-            delete_quadtree(root->children[i]);
+            if (root->children[i] != NULL) {
+                delete_quadtree(root->children[i]);
+            }
+            
         }
         free(root);
     }
@@ -88,6 +91,14 @@ void delete_quadtree(QTNode *root) {
 void save_qtree_as_ppm(QTNode *root, char *filename) {
     (void)root;
     (void)filename;
+
+    FILE *fp = fopen(filename, "w");
+    fprintf(fp, "P3\n%u %u\n255", root->width, root->height); // 255 is always assumed as MAX INTENSITY; root->intensity is the AVERAGE INTENSITY
+
+    
+    
+    
+    fclose(fp);
 }
 
 QTNode *load_preorder_qt(char *filename) {
