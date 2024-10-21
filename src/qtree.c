@@ -32,13 +32,14 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
 
     // initialize root
     QTNode *root = malloc(sizeof(QTNode)); // malloc first
+    root->intensity = (unsigned char)average;
+    root->row = r;
+    root->col = c;
+    root->height = h;
+    root->width = w;
+
     if (RMSE <= max_rmse) { // base case -> leaf node
         //*root = (QTNode){image->intensity, r, c, image->height, image->width, NULL}; // technically nulls are not necessary b/c even if you don't initialize they'll be set to 0 and NULl anyways};
-        root->intensity = (unsigned char)average;
-        root->row = r;
-        root->col = c;
-        root->height = h;
-        root->width = w;
         for (int i = 0; i < 4; i++) {
             root->children[i] = NULL;
         }
@@ -82,7 +83,6 @@ void delete_quadtree(QTNode *root) {
             if (root->children[i] != NULL) {
                 delete_quadtree(root->children[i]);
             }
-            
         }
         free(root);
     }
@@ -95,11 +95,16 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
     FILE *fp = fopen(filename, "w");
     fprintf(fp, "P3\n%u %u\n255", root->width, root->height); // 255 is always assumed as MAX INTENSITY; root->intensity is the AVERAGE INTENSITY
 
-    
+    // must use recursion to use the data(intensity) of each root node
     
     
     fclose(fp);
 }
+
+// // helper function because the file header must be written by original function; this one handles the recursion separately
+// void save_qtree_as_ppm(QTNode *root, char *filename) {
+
+// }
 
 QTNode *load_preorder_qt(char *filename) {
     (void)filename;
