@@ -24,11 +24,14 @@ Image *load_image(char *filename) {
             }
         }
     }
-    //fscanf(fp, "%u %u", &width, &height);
+    
     // store max intensity
     unsigned char intensity = 0;
-    fscanf(fp, "%c ", &intensity);
-    
+    int temp = 0; // scan as int, convert to char
+    fscanf(fp, "%d ", &temp);
+    intensity = (char)temp;
+    //printf("width: %u \t height: %u \t intensity: %d \n", width, height, intensity);
+
     unsigned int **pixels = malloc(height * sizeof(unsigned int *)); // create dynamic array by malloc'ing
     for (unsigned int i = 0; i < height; i++) { // malloc per row
         pixels[i] = malloc(width * sizeof(unsigned int));
@@ -36,9 +39,11 @@ Image *load_image(char *filename) {
     unsigned int r = 0, g = 0, b = 0; // stores R G B 
     for (unsigned int p = 0; p < height; p++) { // p -> pixels array index
         for (unsigned int q = 0; q < width; q++) {
-            fscanf(fp, " %u %u %u", &r, &g, &b);
+            fscanf(fp, "%u %u %u ", &r, &g, &b);
+            printf("%u ", r);
             pixels[p][q] = r; // still dereferences pixels; same as *(pixels + p) but syntactic sugar
         }
+        printf("\n");
     }
 
     fclose(fp);
@@ -46,6 +51,7 @@ Image *load_image(char *filename) {
     Image *img = malloc(sizeof(Image));
     img->width = width;
     img->height = height;
+    img->intensity = intensity;
     img->pixels = pixels;
 
     return img;
