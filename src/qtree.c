@@ -37,11 +37,11 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
     root->col = c;
     root->height = h;
     root->width = w;
-    printf("row: %u, col: %u, height: %u, width: %u\n", r, c, h, w);
-    printf("Average: %f, RMSE: %f\n", average, RMSE);
+    //printf("row: %u, col: %u, height: %u, width: %u\n", r, c, h, w);
+    //printf("Average: %f, RMSE: %f\n", average, RMSE);
     
     if (RMSE <= max_rmse || h == 1 || w == 1) { // base case -> leaf node
-        printf("leaf node!\n");
+        //printf("leaf node!\n");
         for (int i = 0; i < 4; i++) {
             root->children[i] = NULL;
         }
