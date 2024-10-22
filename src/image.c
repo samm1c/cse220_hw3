@@ -128,7 +128,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     unsigned int r, g, b; // placeholders for intensity
     int lim = 0; // determines how many characters to encode
 
-    if (M < (8 * (N + 1))) { // not enough pixels for the message!; N+1 for null character
+    if (M < (8 * (N + 1))) { // not enough pixels for the message!; N+1 for null character; you need 8 pixels for 1 character
         //printf("M - 1 : %d\n", M - 1);
         //printf("M / 8 : %d\n", M/8);
         M -= 8; // reserve for the null character
@@ -158,7 +158,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
         message++; // next character
     }
 
-    // include null character!!!! \0 -> 0000 in ASCII
+    // include null character!!!! \0 -> 0000 0000 in 8-bit ASCII
     for (int i = 0; i < 8; i++) {
         fscanf(f_input, "%u %u %u ", &r, &g, &b);
         printf("r: %u\t", r);
@@ -176,7 +176,8 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     fclose(f_input);
     fclose(f_output);
     
-    return 0; // success!!!
+    printf("lim: %u\n", lim);
+    return lim; // return number of printable characters
 }
 
 char *reveal_message(char *input_filename) {
