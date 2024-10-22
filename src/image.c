@@ -87,10 +87,6 @@ unsigned short get_image_height(Image *image) {
 
 // message -> last bit of each pixel
 unsigned int hide_message(char *message, char *input_filename, char *output_filename) {
-    // (void)message;
-    // (void)input_filename;
-    // (void)output_filename;
-    // return 0;
 
     // file handler -> read the input file
     FILE *f_input = fopen(input_filename, "r");
@@ -110,10 +106,12 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
             i--; // decrement because it's a comment so you want to iterate one MORE time
         }
     }
+
     // count M
     unsigned int M, h, w;
     fscanf(f_input, "%u %u", &h, &w);
     M = h * w; // -> number of total pixels is height * width
+    printf("M: %d\n", M);
 
     // put back at beginning of file
     rewind(f_input);
@@ -130,11 +128,16 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     unsigned int r, g, b; // placeholders for intensity
     int lim = 0; // determines how many characters to encode
 
-    if (M < (N + 1)) { // not enough pixels for the message!; N+1 for null character
-        lim = M - 1;
+    if (M < (8 * (N + 1))) { // not enough pixels for the message!; N+1 for null character
+        //printf("M - 1 : %d\n", M - 1);
+        //printf("M / 8 : %d\n", M/8);
+        M -= 8; // reserve for the null character
+        lim = (M / 8);
     } else { 
         lim = N;
     }
+
+    printf("lim: %d\n", lim);
 
     for (int a = 0; a < lim; a++) { // a doesn't matter, just to count however many times up to lim
         char c = *message;
@@ -148,27 +151,26 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
             r &= ~(1); // clear the bit first
             r |= k; // add what we need (0 or 1)
             
-            
+            printf("r: %d \t k: %u \t c: %c\n", r, k, c);
             fprintf(f_output, "%u %u %u\n", r, r, r);
         }
+        //printf("r: %d \t c: %c\n", r, c);
         message++; // next character
     }
-
-    // // iterate over every character in the message
-    //while (*message != '\0') {
-        
-    //}
 
     // include null character!!!! \0 -> 0000 in ASCII
     for (int i = 0; i < 4; i++) {
         fscanf(f_input, "%u %u %u ", &r, &g, &b);
+        printf("r: %u\t", r);
         r &= ~(1); // just zero out the last bit
+        printf("r: %u\n", r);
         fprintf(f_output, "%u %u %u\n", r, r, r);
     }
 
     // write the rest of the input file into output -> leave the rest of the rgb/intensity/values alone!!!! no more secrete message!!!
     while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
         fprintf(f_output, "%u %u %u\n", r, g, b);
+        printf("r: %u\n", r);
     }
 
     fclose(f_input);
@@ -193,7 +195,8 @@ char *reveal_message(char *input_filename) {
     int end = 0; // flag to signal null character
     int index = 0; // also used to count length 
     int cap = 10;
-    char *message = malloc(cap * sizeof(char)); // we are handling msg dynamically and reallocating memory as necessary
+    // i did NOT want to count how long msg was and THEN allocate mem, so am using realloc instead
+    char *message = malloc(cap * sizeof(char)); // we are handling msg dynamically and reallocating memory as necessary;
     unsigned int r, g, b;
     while (!end) {
 
@@ -214,12 +217,9 @@ char *reveal_message(char *input_filename) {
 
         if (c == '\0') {
             end = 1; // null character!
-            index++; // must also account for 
         }
         
     }
-    
-    printf("msgs: %s\n", message);
 
     fclose(fp);
 
