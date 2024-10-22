@@ -179,7 +179,7 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
     // variables
     char type; // type of node
     unsigned int i, r, h, c, w;
-    QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly
+    QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly for THIS node
 
     //fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
 

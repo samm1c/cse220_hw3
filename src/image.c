@@ -1,4 +1,5 @@
 #include "image.h"
+#include <string.h>
 
 // part 1
 Image *load_image(char *filename) {
@@ -82,19 +83,150 @@ unsigned short get_image_height(Image *image) {
 
 
 
-// part 2
+// part 3
+
+// message -> last bit of each pixel
 unsigned int hide_message(char *message, char *input_filename, char *output_filename) {
-    (void)message;
-    (void)input_filename;
-    (void)output_filename;
-    return 0;
+    // (void)message;
+    // (void)input_filename;
+    // (void)output_filename;
+    // return 0;
+
+    // file handler -> read the input file
+    FILE *f_input = fopen(input_filename, "r");
+    char line[256]; // buffer
+
+    // file handler -> write to the output file
+    FILE *f_output = fopen(output_filename, "w");
+
+    // figure out how long string is -> N 
+    unsigned int N = strlen(message);
+
+    // figure out how many pixels is in input -> M
+    // skip first line (+ any comments)
+    for (int i = 0; i < 1; i++) {
+        fgets(line, sizeof(line), f_input);
+        if (line[0] == '#') {
+            i--; // decrement because it's a comment so you want to iterate one MORE time
+        }
+    }
+    // count M
+    unsigned int M, h, w;
+    fscanf(f_input, "%u %u", &h, &w);
+    M = h * w; // -> number of total pixels is height * width
+
+    // put back at beginning of file
+    rewind(f_input);
+
+    // to skip over first 3 lines (assume comments ommitted)
+    for (int i = 0; i < 3; i++) {
+        fgets(line, sizeof(line), f_input); // put the line into the char array line
+        fprintf(f_output, "%s", line);
+        if (line[0] == '#') {
+            i--; // decrement because it's a comment so you want to iterate one MORE time
+        }
+    }
+
+    unsigned int r, g, b; // placeholders for intensity
+    int lim = 0; // determines how many characters to encode
+
+    if (M < (N + 1)) { // not enough pixels for the message!; N+1 for null character
+        lim = M - 1;
+    } else { 
+        lim = N;
+    }
+
+    for (int a = 0; a < lim; a++) { // a doesn't matter, just to count however many times up to lim
+        char c = *message;
+        for (int i = 7; i >= 0; i--) { // 1 ASCII character -> 8 bits -> 8 pixels
+            // take in the set of 3 rgb (grayscale) values for 1 single pixel and change them
+            fscanf(f_input, "%u %u %u ", &r, &g, &b);
+            
+            unsigned int k = (c >> i) & 1; // bit to insert into rgb; & 1 is so that you only take the last bit and ignore the rest
+            
+            // set/modify last bit -> r is changed
+            r &= ~(1); // clear the bit first
+            r |= k; // add what we need (0 or 1)
+            
+            
+            fprintf(f_output, "%u %u %u\n", r, r, r);
+        }
+        message++; // next character
+    }
+
+    // // iterate over every character in the message
+    //while (*message != '\0') {
+        
+    //}
+
+    // include null character!!!! \0 -> 0000 in ASCII
+    for (int i = 0; i < 4; i++) {
+        fscanf(f_input, "%u %u %u ", &r, &g, &b);
+        r &= ~(1); // just zero out the last bit
+        fprintf(f_output, "%u %u %u\n", r, r, r);
+    }
+
+    // write the rest of the input file into output -> leave the rest of the rgb/intensity/values alone!!!! no more secrete message!!!
+    while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
+        fprintf(f_output, "%u %u %u\n", r, g, b);
+    }
+
+    fclose(f_input);
+    fclose(f_output);
+    
+    return 0; // success!!!
 }
 
 char *reveal_message(char *input_filename) {
     (void)input_filename;
     return NULL;
+    
+    FILE *fp = fopen(input_filename, "r");
+
+    // skip first 3 lines
+    char line[256]; // buffer
+    for (int i = 0; i < 3; i++) {
+        fgets(line, sizeof(line), fp);
+        if (line[0] == '#') { // comment! continue loop
+            i--;
+        }
+    }
+
+    int end = 0; // flag to signal null character
+    int index = 0; // also used to count length 
+    int cap = 10;
+    char *message = malloc(cap * sizeof(char)); // we are handling msg dynamically and reallocating memory as necessary
+    unsigned int r, g, b;
+    while (!end) {
+
+        char c = 0; // incoming character; NOT '0' which is 48 in ASCII
+
+        if (cap <= (index + 1)) { // not enough memory!
+            cap *= 2;
+            message = realloc(message, cap * sizeof(char));
+        }
+        
+        for (int i = 7; i >= 0; i--) { // one character -> 8 ASCII -> 8 bits -> 8 pixels
+            fscanf(fp, "%u %u %u ", &r, &g, &b);
+            int last_bit = r & 1; // only want last bit
+            c |= last_bit << i; // shift it into position
+        }
+
+        message[index++] = c;
+
+        if (c == '\0') {
+            end = 1; // null character!
+            index++; // must also account for 
+        }
+        
+    }
+
+    fclose(fp);
+
+    return message;
 }
 
+// image ->
 unsigned int hide_image(char *secret_image_filename, char *input_filename, char *output_filename) {
     (void)secret_image_filename;
     (void)input_filename;
