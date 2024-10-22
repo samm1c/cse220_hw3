@@ -159,7 +159,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     }
 
     // include null character!!!! \0 -> 0000 in ASCII
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
         fscanf(f_input, "%u %u %u ", &r, &g, &b);
         printf("r: %u\t", r);
         r &= ~(1); // just zero out the last bit
