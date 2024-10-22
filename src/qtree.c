@@ -48,23 +48,23 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
     } else if (h == 1) { // single row -> child 3 and 4 NULL
         unsigned int half_w = w / 2; // single horizontal row -> split width in half, keep height of 1
         (root->children[0]) = create_quadtree_helper(image, r, c, h, half_w, max_rmse);
-        (root->children[1]) = create_quadtree_helper(image, r, c + half_w, h, half_w, max_rmse);
+        (root->children[1]) = create_quadtree_helper(image, r, c + half_w, h, w - half_w, max_rmse);
         (root->children[2]) = NULL;
         (root->children[3]) = NULL;
     } else if (w == 1) { // single column -> child 2 and 4 NULL
         unsigned int half_h = h / 2;
-        (root->children[0]) = create_quadtree_helper(image, r, c, half_h, w, max_rmse);;
+        (root->children[0]) = create_quadtree_helper(image, r, c, half_h, w, max_rmse);
         (root->children[1]) = NULL;
-        (root->children[2]) = create_quadtree_helper(image, r + half_h, c, half_h, w, max_rmse);;
+        (root->children[2]) = create_quadtree_helper(image, r + half_h, c, h - half_h, w, max_rmse);
         (root->children[3]) = NULL;
     } else { // error is greater than necessary -> bad -> split the node -> normal 4 children 
         // variables just to make life easier
         unsigned int half_h = h / 2;
         unsigned int half_w = w / 2;
         (root->children[0]) = create_quadtree_helper(image, r, c, half_h, half_w, max_rmse);
-        (root->children[1]) = create_quadtree_helper(image, r, c + half_w, half_h, half_w, max_rmse);
-        (root->children[2]) = create_quadtree_helper(image, r + half_h, c, half_h, half_w, max_rmse);
-        (root->children[3]) = create_quadtree_helper(image, r + half_h, c + half_w, half_h, half_w, max_rmse);
+        (root->children[1]) = create_quadtree_helper(image, r, c + half_w, half_h, w - half_w, max_rmse);
+        (root->children[2]) = create_quadtree_helper(image, r + half_h, c, h - half_h, half_w, max_rmse);
+        (root->children[3]) = create_quadtree_helper(image, r + half_h, c + half_w, h - half_h, w - half_w, max_rmse);
     }
     return root;
 }
