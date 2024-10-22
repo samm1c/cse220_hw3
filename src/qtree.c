@@ -4,7 +4,8 @@
 // function prototypes because i don't like writing helper functions before the actual function
 QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, unsigned int h, unsigned int w, double max_rmse);
 void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels);
-QTNode *load_preorder_qt_helper(FILE *fp, int k);
+QTNode *load_preorder_qt_helper(FILE *fp);
+void save_preorder_qt_helper(QTNode *root, FILE *fp);
 
 // part 2
 QTNode *create_quadtree(Image *image, double max_rmse) {
@@ -162,27 +163,30 @@ QTNode *load_preorder_qt(char *filename) {
     // open the file and initialize file handler (fp)
     FILE *fp = fopen(filename, "r");
 
-    //QTNode *root = malloc(sizeof(QTNode));
-    //root = load_preorder_qt_helper(fp);
-    QTNode *root = load_preorder_qt_helper(fp, 0);
-    printf("size: %ld\n", sizeof(root));
+    // use helper function to perform recursion
+    QTNode *root = load_preorder_qt_helper(fp);
+    //printf("size: %ld\n", sizeof(root));
+
+    // close file handler
     fclose(fp);
 
     return root;
 }
 
 // performs recursion
-QTNode *load_preorder_qt_helper(FILE *fp, int k) {
-
+QTNode *load_preorder_qt_helper(FILE *fp) {
+    //(void)k;
     // variables
     char type; // type of node
     unsigned int i, r, h, c, w;
-    QTNode *root = malloc(sizeof(QTNode));
+    QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly
 
-    if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
-        printf("EOF or leaf?!");
-        return NULL;
-    }
+    fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
+
+    // if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
+    //     printf("EOF or leaf?!");
+    //     return NULL;
+    // }
 
     // initialize QTNode
     root->intensity = i;
@@ -194,18 +198,43 @@ QTNode *load_preorder_qt_helper(FILE *fp, int k) {
        root->children[j] = NULL;
     }
 
-    if (type == 'N') { // internal node -> continue recursion
-        printf("%dN!\t", k);
+    // internal node -> continue recursion
+    if (type == 'N') { 
+        //printf("%dN!\t", k);
         for (int j = 0; j < 4; j++) {
-            root->children[j] = load_preorder_qt_helper(fp, ++k);
+            root->children[j] = load_preorder_qt_helper(fp);
         }
     }
 
+    // always returns node regardless if it's an internal node or leaf
     return root;
 }
 
 void save_preorder_qt(QTNode *root, char *filename) {
-    (void)root;
-    (void)filename;
+    
+    // open file and create file handler (fp)
+    FILE *fp = fopen(filename, "w");
+
+    // recursion
+    save_preorder_qt_helper(root, fp);
+
+    fclose(fp);
+}
+
+// performs recursion for main function
+void save_preorder_qt_helper(QTNode *root, FILE *fp) {
+    if (root == NULL) { // base case -> do nothing
+        return;
+    }
+    //printf("bruh");
+    if ((root->children[0] == NULL) && (root->children[1] == NULL) && (root->children[2] == NULL) && (root->children[3] == NULL)) { // leaf node!
+        fprintf(fp, "L %u %u %u %u %u\n", root->intensity, root->row, root->height, root->col, root->width);
+    } else { // internal node! -> recurse through children
+        fprintf(fp, "N %u %u %u %u %u\n", root->intensity, root->row, root->height, root->col, root->width);
+        for (int i = 0; i < 4; i++) {
+            save_preorder_qt_helper(root->children[i], fp);
+        }
+    }
+
 }
 
