@@ -3,6 +3,7 @@
 
 // function prototypes because i don't like writing helper functions before the actual function
 QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, unsigned int h, unsigned int w, double max_rmse);
+void save_qtree_as_ppm_helper(QTNode *root, FILE *fp);
 
 // part 2
 QTNode *create_quadtree(Image *image, double max_rmse) {
@@ -106,19 +107,37 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
     (void)root;
     (void)filename;
 
-    //FILE *fp = fopen(filename, "w");
-    //fprintf(fp, "P3\n%u %u\n255", root->width, root->height); // 255 is always assumed as MAX INTENSITY; root->intensity is the AVERAGE INTENSITY
+    FILE *fp = fopen(filename, "w");
+    // ppm header
+    fprintf(fp, "P3\n%u %u\n255", root->width, root->height); // 255 is always assumed as MAX INTENSITY; root->intensity is the AVERAGE INTENSITY
 
-    // must use recursion to use the data(intensity) of each root node
-    
-    
-    //fclose(fp);
+    //must use recursion to use the data(intensity) of each root node
+    save_qtree_as_ppm_helper(root, fp);
+    //close file handler
+    fclose(fp);
 }
 
-// // helper function because the file header must be written by original function; this one handles the recursion separately
-// void save_qtree_as_ppm(QTNode *root, char *filename) {
-//     fprintf();
-// }
+// helper function because the file header must be written by original function; this one handles the recursion separately
+void save_qtree_as_ppm_helper(QTNode *root, FILE *fp) {
+    if (root == NULL) { // base case -> do nothing
+        return;
+    }
+    // write to the file ONLY if it's a leaf node becuase those are the compressed ones that have the same intensity
+    if ((root->children[0] == NULL) && (root->children[1] == NULL) && (root->children[2] == NULL) && (root->children[3] == NULL)) {
+        // write for each pixel in the region
+        for (unsigned int i = 0; i < root->height; i++) {
+            for (unsigned int j = 0; j < root->width; j++) {
+                fprintf(fp, "\n%u %u %u", root->intensity, root->intensity, root->intensity); // recursive call
+            }
+        }
+    } else { 
+        for (unsigned int i = 0; i < 4; i++) {
+            if (root->children[i] != NULL) {
+                save_qtree_as_ppm_helper(root->children[i], fp);
+            }
+        }
+    }
+}
 
 QTNode *load_preorder_qt(char *filename) {
     (void)filename;
