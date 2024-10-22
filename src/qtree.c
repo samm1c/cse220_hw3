@@ -181,12 +181,12 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
     unsigned int i, r, h, c, w;
     QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly
 
-    fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
+    //fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
 
-    // if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
-    //     printf("EOF or leaf?!");
-    //     return NULL;
-    // }
+    if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
+        //printf("EOF or leaf?!");
+        return NULL;
+    }
 
     // initialize QTNode
     root->intensity = i;
