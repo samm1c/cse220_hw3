@@ -4,6 +4,7 @@
 // function prototypes because i don't like writing helper functions before the actual function
 QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, unsigned int h, unsigned int w, double max_rmse);
 void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels);
+QTNode *load_preorder_qt_helper(FILE *fp, int k);
 
 // part 2
 QTNode *create_quadtree(Image *image, double max_rmse) {
@@ -95,9 +96,7 @@ void delete_quadtree(QTNode *root) {
         return;
     } else {
         for (int i = 0; i < 4; i++) { // must recursively free up children b/c you don't know how big the tree is
-            if (root->children[i] != NULL) {
-                delete_quadtree(root->children[i]);
-            }
+            delete_quadtree(root->children[i]);
         }
         free(root);
     }
@@ -109,7 +108,7 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
     FILE *fp = fopen(filename, "w");
 
     // ppm header (first 3 lines)
-    fprintf(fp, "P3\n%u %u\n255", root->width, root->height); // 255 is always assumed as MAX INTENSITY; root->intensity is the AVERAGE INTENSITY
+    fprintf(fp, "P3\n%u %u\n255\n", root->width, root->height); // 255 is always assumed as MAX INTENSITY; root->intensity is the AVERAGE INTENSITY
     
     // create a 2D array to hold all of the pixels, which we will iterate over and write to file that way b/c it's easier
     // MALLOC 2D ARRAY FIRST
@@ -124,7 +123,7 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
     // using new 2D array (pixels), write to the file in ROW-MAJOR order by just iterating over it 
     for (unsigned int i = 0; i < root->height; i++) {
             for (unsigned int j = 0; j < root->width; j++) {
-                fprintf(fp, "\n%u %u %u", pixels[i][j], pixels[i][j], pixels[i][j]);
+                fprintf(fp, "%u %u %u\n", pixels[i][j], pixels[i][j], pixels[i][j]);
             }
     }
 
@@ -159,8 +158,50 @@ void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels) {
 }
 
 QTNode *load_preorder_qt(char *filename) {
-    (void)filename;
-    return NULL;
+
+    // open the file and initialize file handler (fp)
+    FILE *fp = fopen(filename, "r");
+
+    //QTNode *root = malloc(sizeof(QTNode));
+    //root = load_preorder_qt_helper(fp);
+    QTNode *root = load_preorder_qt_helper(fp, 0);
+    printf("size: %ld\n", sizeof(root));
+    fclose(fp);
+
+    return root;
+}
+
+// performs recursion
+QTNode *load_preorder_qt_helper(FILE *fp, int k) {
+
+    // variables
+    char type; // type of node
+    unsigned int i, r, h, c, w;
+    QTNode *root = malloc(sizeof(QTNode));
+
+    if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
+        printf("EOF or leaf?!");
+        return NULL;
+    }
+
+    // initialize QTNode
+    root->intensity = i;
+    root->row = r;
+    root->height = h;
+    root->col = c;
+    root->width = w;
+    for (int j = 0 ; j < 4; j++) { // children are explicitly NULL because malloc may lead to unexplained behavior
+       root->children[j] = NULL;
+    }
+
+    if (type == 'N') { // internal node -> continue recursion
+        printf("%dN!\t", k);
+        for (int j = 0; j < 4; j++) {
+            root->children[j] = load_preorder_qt_helper(fp, ++k);
+        }
+    }
+
+    return root;
 }
 
 void save_preorder_qt(QTNode *root, char *filename) {

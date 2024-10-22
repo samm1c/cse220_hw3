@@ -15,11 +15,11 @@ Image *load_image(char *filename) {
     unsigned int width = 0, height = 0;
     while (1) { // loop will break by itself
         char line[256]; // char array buffer to store second line
-        fgets(line, sizeof(line), fp);
+        fgets(line, sizeof(line), fp); // entire scanner skips over line by storing it in buffer called line
         if (line[0] == '#') {
             continue; // keep skipping comment lines
-        } else {
-            if (sscanf(line, "%u %u ", &width, &height) == 2) { // successfully stored 2 items
+        } else { 
+            if (sscanf(line, "%u %u ", &width, &height) == 2) { // successfully stored 2 items; sscanf takes a string and reads it
                 break;
             }
         }
