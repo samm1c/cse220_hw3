@@ -175,7 +175,6 @@ QTNode *load_preorder_qt(char *filename) {
 
 // performs recursion
 QTNode *load_preorder_qt_helper(FILE *fp) {
-    //(void)k;
     // variables
     char type; // type of node
     unsigned int i, r, h, c, w;
@@ -201,16 +200,10 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
     // internal node -> continue recursion
     if (type == 'N') { 
         //printf("%dN!\t", k);
-        if (h == 1 && w != 1) { // single row -> child 3 and 4 NULL, recurse child 1 and 2
-            root->children[2] = NULL;
-            root->children[3] = NULL;
-
+        if (h == 1 && w > 1) { // single row -> child 3 and 4 NULL, recurse child 1 and 2
             root->children[0] = load_preorder_qt_helper(fp);
             root->children[1] = load_preorder_qt_helper(fp);
-        } else if (w == 1 && h != 1) { // single column -> child 2 and 3 NULL, recurse child 1 and 4
-            root->children[1] = NULL;
-            root->children[2] = NULL;
-
+        } else if (w == 1 && h > 1) { // single column -> child 2 and 3 NULL, recurse child 1 and 4
             root->children[0] = load_preorder_qt_helper(fp);
             root->children[3] = load_preorder_qt_helper(fp);
         } else { // normal square -> recurse thru all 4 children 

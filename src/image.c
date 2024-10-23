@@ -111,7 +111,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     unsigned int M, h, w;
     fscanf(f_input, "%u %u", &h, &w);
     M = h * w; // -> number of total pixels is height * width
-    printf("M: %d\n", M);
+    //printf("M: %d\n", M);
 
     // put back at beginning of file
     rewind(f_input);
@@ -137,7 +137,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
         lim = N;
     }
 
-    printf("lim: %d\n", lim);
+    //printf("lim: %d\n", lim);
 
     for (int a = 0; a < lim; a++) { // a doesn't matter, just to count however many times up to lim
         char c = *message;
@@ -161,16 +161,16 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     // include null character!!!! \0 -> 0000 0000 in 8-bit ASCII
     for (int i = 0; i < 8; i++) {
         fscanf(f_input, "%u %u %u ", &r, &g, &b);
-        printf("r: %u\t", r);
+        //printf("r: %u\t", r);
         r &= ~(1); // just zero out the last bit
-        printf("r: %u\n", r);
+        //printf("r: %u\n", r);
         fprintf(f_output, "%u %u %u\n", r, r, r);
     }
 
     // write the rest of the input file into output -> leave the rest of the rgb/intensity/values alone!!!! no more secrete message!!!
     while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
         fprintf(f_output, "%u %u %u\n", r, g, b);
-        printf("r: %u\n", r);
+        //printf("r: %u\n", r);
     }
 
     fclose(f_input);
@@ -246,6 +246,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
     }
     fscanf(f_secret, "%u %u ", &secret_w, &secret_h);
     fgets(line, sizeof(line), f_secret); // skip intensity
+    //printf("secret_w: %u \t secret_h: %u\n", secret_w, secret_h);
 
     // copy header of input file -> output file
     unsigned int input_w = 0, input_h = 0;
@@ -253,15 +254,18 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
     fprintf(f_output, "%s", line);
     fgets(line, sizeof(line), f_input);
     while (line[0] == '#') { // comment -> reiterate
-        fgets(line, sizeof(line), f_input); // keep skipping lines
+        fprintf(f_output, "%s", line);
+        fgets(line, sizeof(line), f_input); // keep iterating over comment
     }
     // copy and get input width and height
-    printf("LINE: %s\n", line);
+    //printf("LINE: %s\n", line);
     sscanf(line, "%u %u ", &input_w, &input_h);
     fprintf(f_output, "%s", line);
     // copy rest (intensity)
     fgets(line, sizeof(line), f_input);
     fprintf(f_output, "%s", line);
+
+    //printf("input_w: %u \t input_h: %u \n", input_w, input_h);
 
     // after getting all our needed info, check for potential size incompatibility/error
     printf("%d < %d\n", (8 * (secret_w * secret_h) + 16), (input_w * input_h));
@@ -283,7 +287,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
         fprintf(f_output, "%u %u %u\n", r, r, r);
         printf("k: %u r: %u\n", k, r);
     }
-
+    printf("--------------------\n");
     // next 8 pixels of output -> secret height
     for (int i = 7; i >= 0; i--) {
         fscanf(f_input, "%u %u %u ", &r, &g, &b);
@@ -294,7 +298,9 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
         r |= k;
 
         fprintf(f_output, "%u %u %u\n", r, r, r); 
+        printf("k: %u r: %u\n", k, r);
     }
+    printf("--------------------\n");
 
     // rest of secret pixels (w * h) -> secret intensities!! (8 again per pixel)
     unsigned int x, y, z; // rgb for secret image
@@ -306,6 +312,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
             r &= ~1;
             r |= k;
             fprintf(f_output, "%u %u %u\n", r, r, r); 
+            //printf("k: %u r: %u\n", k, r);
         }
     }
 
