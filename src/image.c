@@ -270,18 +270,16 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
 
         fprintf(f_output, "%u %u %u\n", inputs[i], inputs[i], inputs[i]);
         i++; // move onto the next pixel in input pixels
-        //printf("k: %u r: %u\n", k, r);
     }
     // enocde next 8 pixels of output -> height
     for (int j = 7; j >= 0; j--) {  
-        unsigned int k = (secret_img->width >> j) & 1; // bit to insert; & 1 -> only want the last, ignore rest
+        unsigned int k = (secret_img->height >> j) & 1; // bit to insert; & 1 -> only want the last, ignore rest
 
         inputs[i] &= ~1; // clear the last bit
         inputs[i] |= k;// set the last bit
 
         fprintf(f_output, "%u %u %u\n", inputs[i], inputs[i], inputs[i]);
         i++;
-        //printf("k: %u r: %u\n", k, r);
     }
 
     // encode the rest of the secret pixels
@@ -439,49 +437,4 @@ void reveal_image(char *input_filename, char *output_filename) {
     }
     
     fclose(fp);
-
-    // FILE *f_input = fopen(input_filename, "r");
-    // FILE *f_output = fopen(output_filename, "w");
-
-    // // skip the first 3 or so lines + comments
-    // char line[1024]; // buffer -> holds current line
-    // for (int i = 0; i < 4; i++) {
-    //     fgets(line, sizeof(line), f_input);
-    //     // if (line[0] == '#') {
-    //     //     i--;
-    //     // }
-    // }
-
-    // // read the first 8 pixels -> width
-    // unsigned int secret_w = 0;
-    // unsigned int r, g, b;
-    // for (int i = 7; i >= 0; i--) {
-    //     fscanf(f_input, "%u %u %u ", &r, &g, &b);
-    //     unsigned int k = r & 1; // k -> last bit
-    //     secret_w |= (k << i); // add the bit by pushing it into position
-    // }
-
-    // // read the next 8 pixels -> height
-    // unsigned int secret_h = 0;
-    // for (int i = 7; i >= 0; i--) {
-    //     fscanf(f_input, "%u %u %u ", &r, &g, &b);
-    //     unsigned int k = r & 1;
-    //     secret_h |= (k << i);
-    // }
-
-    // // build the output file using the information you just found
-    // fprintf(f_output, "P3\n%u %u\n255\n", secret_w, secret_h);
-
-    // // using the secret w and h you just found, iterate w*h times to obtain the last bit of each pixel for intensity; 8 pixels -> 1 intensity
-    // for (unsigned int i = 0; i < (secret_w * secret_h); i++) {
-    //     unsigned int intensity = 0; // stores intensity that we are building
-    //     for (int j = 7; j >= 0; j--) {
-    //         fscanf(f_input, "%u %u %u ", &r, &g, &b);
-    //         unsigned int k = r & 1;
-    //         intensity |= (k << j);
-    //         //printf("k: %u \t intensity: %u\n", k, intensity);
-    //     }
-    //     //printf("original r: %u \t intensity: %u\n", r, intensity);
-    //     fprintf(f_output, "%u %u %u\n", intensity, intensity, intensity);
-    // }
 }
