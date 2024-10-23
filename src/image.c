@@ -15,7 +15,7 @@ Image *load_image(char *filename) {
     // skip comment(s) -> store width and height
     unsigned int width = 0, height = 0;
     while (1) { // loop will break by itself
-        char line[256]; // char array buffer to store second line
+        char line[1024]; // char array buffer to store second line
         fgets(line, sizeof(line), fp); // entire scanner skips over line by storing it in buffer called line
         if (line[0] == '#') {
             continue; // keep skipping comment lines
@@ -92,7 +92,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
 
     // file handler -> read the input file
     FILE *f_input = fopen(input_filename, "r");
-    char line[256]; // buffer
+    char line[1024]; // buffer
 
     // file handler -> write to the output file
     FILE *f_output = fopen(output_filename, "w");
@@ -187,7 +187,7 @@ char *reveal_message(char *input_filename) {
     FILE *fp = fopen(input_filename, "r");
 
     // skip first 3 lines
-    char line[256]; // buffer
+    char line[1024]; // buffer
     for (int i = 0; i < 3; i++) {
         fgets(line, sizeof(line), fp);
         if (line[0] == '#') { // comment! continue loop
@@ -234,7 +234,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
 
     Image *secret_img = load_image(secret_image_filename);
     Image *input_img = load_image(input_filename);
-    char line[256];
+    char line[1024];
     FILE *f_input = fopen(input_filename, "r");
     FILE *f_output = fopen(output_filename, "w");
 
@@ -310,7 +310,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
     // FILE *f_secret = fopen(secret_image_filename, "r");
     // FILE *f_input = fopen(input_filename, "r");
     // FILE *f_output = fopen(output_filename, "w");
-    // char line[256]; // buffer
+    // char line[1024]; // buffer
 
     // // break down secret image info
     // unsigned int secret_w, secret_h;
@@ -414,25 +414,25 @@ void reveal_image(char *input_filename, char *output_filename) {
     // iterate over first 8 pixels in img -> width
     unsigned int secret_w = 0;
     for (int i = 7; i >= 0; i--) {
-        unsigned int k = pixels[p++] & 1; // cut last bit
+        unsigned int k = (unsigned int)pixels[p++] & 1; // cut last bit
         secret_w |= (k << i);
     }
 
     // iterate over next 8 pixels in img -> height
     unsigned int secret_h = 0;
     for (int i = 7; i >= 0; i--) {
-        unsigned int k = pixels[p++] & 1; // cut last bit
+        unsigned int k = (unsigned int)pixels[p++] & 1; // cut last bit
         secret_h |= (k << i);
     }
 
     // PPM header
-    fprintf(fp, "P3\n%u %u\n255\n", img->width, img->height);
+    fprintf(fp, "P3\n%u %u\n255\n", secret_w, secret_h);
 
     // translate the hidden bits and assemble them into the secret image and put it into output file
-    for (unsigned int i = 0; i < (img->width * img->height); i++) {
+    for (unsigned int i = 0; i < (secret_w * secret_h); i++) {
         unsigned int intensity = 0; // we are building the number in intensity
         for (int j = 7; j >= 0; j--) {
-            unsigned int k = (pixels[p++] & 1);
+            unsigned int k = (unsigned int)(pixels[p++] & 1);
             intensity |= (k << j);
         }
         fprintf(fp, "%u %u %u \n", intensity, intensity, intensity);
@@ -444,7 +444,7 @@ void reveal_image(char *input_filename, char *output_filename) {
     // FILE *f_output = fopen(output_filename, "w");
 
     // // skip the first 3 or so lines + comments
-    // char line[256]; // buffer -> holds current line
+    // char line[1024]; // buffer -> holds current line
     // for (int i = 0; i < 4; i++) {
     //     fgets(line, sizeof(line), f_input);
     //     // if (line[0] == '#') {
