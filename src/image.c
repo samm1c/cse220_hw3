@@ -33,16 +33,18 @@ Image *load_image(char *filename) {
     intensity = (char)temp;
     //printf("width: %u \t height: %u \t intensity: %d \n", width, height, intensity);
 
-    unsigned int **pixels = malloc(height * sizeof(unsigned int *)); // create dynamic array by malloc'ing
-    for (unsigned int i = 0; i < height; i++) { // malloc per row
-        pixels[i] = malloc(width * sizeof(unsigned int));
-    }
+    unsigned int *pixels = malloc(sizeof(unsigned int) * (width * height));
+    // unsigned int **pixels = malloc(height * sizeof(unsigned int *)); // create dynamic array by malloc'ing
+    // for (unsigned int i = 0; i < height; i++) { // malloc per row
+    //     pixels[i] = malloc(width * sizeof(unsigned int));
+    // }
     unsigned int r = 0, g = 0, b = 0; // stores R G B 
+    unsigned int i = 0; // -> index for pixels
     for (unsigned int p = 0; p < height; p++) { // p -> pixels array index
         for (unsigned int q = 0; q < width; q++) {
             fscanf(fp, "%u %u %u ", &r, &g, &b);
             //printf("%u ", r);
-            pixels[p][q] = r; // still dereferences pixels; same as *(pixels + p) but syntactic sugar
+            pixels[i++] = r; // still dereferences pixels; same as *(pixels + p) but syntactic sugar
         }
         //printf("\n");
     }
@@ -60,17 +62,19 @@ Image *load_image(char *filename) {
 
 void delete_image(Image *image) {
     if (image != NULL) { // make sure image actually exists first
-        for (unsigned int i = 0; i < (image->height); i++) {// deallocate each row
-            free(image->pixels[i]);
-        }
-        free(image->pixels); // deallocate 2D reference
-        image->pixels = NULL; // pixels officially point to nothing
-        free(image); // free object
+        free(image->pixels);
+        free(image);
+        // for (unsigned int i = 0; i < (image->height); i++) {// deallocate each row
+        //     free(image->pixels[i]);
+        // }
+        // free(image->pixels); // deallocate 2D reference
+        // image->pixels = NULL; // pixels officially point to nothing
+        // free(image); // free object
     }
 }
 
 unsigned char get_image_intensity(Image *image, unsigned int row, unsigned int col) {
-    return image->pixels[row][col];
+    return image->pixels[(row * image->width) + col];
 }
 
 unsigned short get_image_width(Image *image) {
@@ -80,8 +84,6 @@ unsigned short get_image_width(Image *image) {
 unsigned short get_image_height(Image *image) {
     return image->height;
 }
-
-
 
 // part 3
 
@@ -329,48 +331,81 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
 
 void reveal_image(char *input_filename, char *output_filename) {
 
-    FILE *f_input = fopen(input_filename, "r");
-    FILE *f_output = fopen(output_filename, "w");
+    Image *img = load_image(input_filename);
+    FILE *fp = fopen(output_filename, "w");
 
-    // skip the first 3 or so lines + comments
-    char line[256]; // buffer -> holds current line
-    for (int i = 0; i < 4; i++) {
-        fgets(line, sizeof(line), f_input);
-        // if (line[0] == '#') {
-        //     i--;
-        // }
-    }
+    unsigned int *pixels = img->pixels;
+    unsigned int p = 0; // index for pixels array
 
-    // read the first 8 pixels -> width
+    // iterate over first 8 pixels in img -> width
     unsigned int secret_w = 0;
-    unsigned int r, g, b;
     for (int i = 7; i >= 0; i--) {
-        fscanf(f_input, "%u %u %u ", &r, &g, &b);
-        unsigned int k = r & 1; // k -> last bit
-        secret_w |= (k << i); // add the bit by pushing it into position
+        unsigned int k = pixels[p++] & 1; // cut last bit
+        secret_w |= (k << i);
     }
 
-    // read the next 8 pixels -> height
+    // iterate over next 8 pixels in img -> height
     unsigned int secret_h = 0;
     for (int i = 7; i >= 0; i--) {
-        fscanf(f_input, "%u %u %u ", &r, &g, &b);
-        unsigned int k = r & 1;
+        unsigned int k = pixels[p++] & 1; // cut last bit
         secret_h |= (k << i);
     }
 
-    // build the output file using the information you just found
-    fprintf(f_output, "P3\n%u %u\n255\n", secret_w, secret_h);
+    // PPM header
+    fprintf(fp, "P3\n%u %u\n255\n", img->width, img->height);
 
-    // using the secret w and h you just found, iterate w*h times to obtain the last bit of each pixel for intensity; 8 pixels -> 1 intensity
-    for (unsigned int i = 0; i < (secret_w * secret_h); i++) {
-        unsigned int intensity = 0; // stores intensity that we are building
+    for (unsigned int i = 0; i < (img->width * img->height); i++) {
+        unsigned int intensity = 0; // we are building the number in intensity
         for (int j = 7; j >= 0; j--) {
-            fscanf(f_input, "%u %u %u ", &r, &g, &b);
-            unsigned int k = r & 1;
+            unsigned int k = (pixels[p++] & 1);
             intensity |= (k << j);
-            //printf("k: %u \t intensity: %u\n", k, intensity);
         }
-        //printf("original r: %u \t intensity: %u\n", r, intensity);
-        fprintf(f_output, "%u %u %u\n", intensity, intensity, intensity);
+        fprintf(fp, "%u %u %u \n", intensity, intensity, intensity);
     }
+    
+
+    // FILE *f_input = fopen(input_filename, "r");
+    // FILE *f_output = fopen(output_filename, "w");
+
+    // // skip the first 3 or so lines + comments
+    // char line[256]; // buffer -> holds current line
+    // for (int i = 0; i < 4; i++) {
+    //     fgets(line, sizeof(line), f_input);
+    //     // if (line[0] == '#') {
+    //     //     i--;
+    //     // }
+    // }
+
+    // // read the first 8 pixels -> width
+    // unsigned int secret_w = 0;
+    // unsigned int r, g, b;
+    // for (int i = 7; i >= 0; i--) {
+    //     fscanf(f_input, "%u %u %u ", &r, &g, &b);
+    //     unsigned int k = r & 1; // k -> last bit
+    //     secret_w |= (k << i); // add the bit by pushing it into position
+    // }
+
+    // // read the next 8 pixels -> height
+    // unsigned int secret_h = 0;
+    // for (int i = 7; i >= 0; i--) {
+    //     fscanf(f_input, "%u %u %u ", &r, &g, &b);
+    //     unsigned int k = r & 1;
+    //     secret_h |= (k << i);
+    // }
+
+    // // build the output file using the information you just found
+    // fprintf(f_output, "P3\n%u %u\n255\n", secret_w, secret_h);
+
+    // // using the secret w and h you just found, iterate w*h times to obtain the last bit of each pixel for intensity; 8 pixels -> 1 intensity
+    // for (unsigned int i = 0; i < (secret_w * secret_h); i++) {
+    //     unsigned int intensity = 0; // stores intensity that we are building
+    //     for (int j = 7; j >= 0; j--) {
+    //         fscanf(f_input, "%u %u %u ", &r, &g, &b);
+    //         unsigned int k = r & 1;
+    //         intensity |= (k << j);
+    //         //printf("k: %u \t intensity: %u\n", k, intensity);
+    //     }
+    //     //printf("original r: %u \t intensity: %u\n", r, intensity);
+    //     fprintf(f_output, "%u %u %u\n", intensity, intensity, intensity);
+    // }
 }

@@ -11,7 +11,7 @@ typedef struct Image {
     unsigned int width;
     unsigned int height;
     unsigned char intensity;
-    unsigned int **pixels; // dynamic array of/pointer to pixels
+    unsigned int *pixels; // dynamic array of/pointer to pixels
 } Image;
 
 // function prototypes for part 1

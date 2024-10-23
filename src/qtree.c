@@ -3,7 +3,7 @@
 
 // function prototypes because i don't like writing helper functions before the actual function
 QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, unsigned int h, unsigned int w, double max_rmse);
-void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels);
+void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels, unsigned int image_width);
 QTNode *load_preorder_qt_helper(FILE *fp);
 void save_preorder_qt_helper(QTNode *root, FILE *fp);
 
@@ -19,7 +19,7 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
     // calculate average
     for (unsigned int i = r; i < (r + h); i++) {
         for (unsigned int j = c; j < (c + w); j++) {
-            sum += image->pixels[i][j];
+            sum += image->pixels[(i * image->width) + j];
         }
     }
     average = sum / (h * w);
@@ -28,7 +28,7 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
     sum = 0; // reusing sum variable
     for (unsigned int i = r; i < (r + h); i++) { // iterate through every pixel to find sum of difference squared
         for (unsigned int j = c; j < (c + w); j++) {
-            sum += pow((image->pixels[i][j] - average), 2);
+            sum += pow((image->pixels[(i * image->width) + j] - average), 2);
         }
     }
     RMSE = sqrt(sum / (h * w));
@@ -119,7 +119,7 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
     }
     
     // initialize said array using quadtree
-    save_qtree_as_ppm_helper(root, pixels);
+    save_qtree_as_ppm_helper(root, pixels, root->width);
 
     // using new 2D array (pixels), write to the file in ROW-MAJOR order by just iterating over it 
     for (unsigned int i = 0; i < root->height; i++) {
@@ -140,7 +140,7 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
 }
 
 // helper function because PPM file header must be written by main function separately; recursively iterates over quadtree and stores in 2D array (pixels) in the correct indices
-void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels) {
+void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels, unsigned int image_width) {
 
     if (root == NULL) { // base case -> do nothing
         return;
@@ -153,7 +153,7 @@ void save_qtree_as_ppm_helper(QTNode *root, unsigned int **pixels) {
         }
     } else { // recursively call because it's an internal node -> not compressed enough yet
         for (int i = 0; i < 4; i++) {
-            save_qtree_as_ppm_helper(root->children[i], pixels);
+            save_qtree_as_ppm_helper(root->children[i], pixels, image_width);
         }
     }
 }
