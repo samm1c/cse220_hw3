@@ -288,6 +288,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
         printf("k: %u r: %u\n", k, r);
     }
     printf("--------------------\n");
+    //fprintf(f_output, "\n\n\nEND OF WIDTH:\n\n\n");
     // next 8 pixels of output -> secret height
     for (int i = 7; i >= 0; i--) {
         fscanf(f_input, "%u %u %u ", &r, &g, &b);
@@ -302,10 +303,12 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
     }
     printf("--------------------\n");
 
+    //fprintf(f_output, "\n\n\nEND OF HEIGHT:\n\n\n");
+
     // rest of secret pixels (w * h) -> secret intensities!! (8 again per pixel)
     unsigned int x, y, z; // rgb for secret image
     for (unsigned int i = 0; i < (secret_w * secret_h); i++) {
-        fscanf(f_secret, "%u %u %u", &x, &y, &z); // x=y=z; assume x is the number you want to encode
+        fscanf(f_secret, "%u %u %u ", &x, &y, &z); // x=y=z; assume x is the number you want to encode
         for (int j = 7; j >= 0; j--) {
             fscanf(f_input, "%u %u %u ", &r, &g, &b);
             unsigned int k = (x >> i) & 1;
@@ -315,7 +318,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
             //printf("k: %u r: %u\n", k, r);
         }
     }
-
+    //fprintf(f_output, "\n\n\nEND OF MSG:\n\n\n");
     // copy rest of input file if there is anything else left
     while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
         fprintf(f_output, "%u %u %u\n", r, g, b);
