@@ -334,11 +334,11 @@ void reveal_image(char *input_filename, char *output_filename) {
 
     // skip the first 3 or so lines + comments
     char line[256]; // buffer -> holds current line
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         fgets(line, sizeof(line), f_input);
-        if (line[0] == '#') {
-            i--;
-        }
+        // if (line[0] == '#') {
+        //     i--;
+        // }
     }
 
     // read the first 8 pixels -> width
