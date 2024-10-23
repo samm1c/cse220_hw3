@@ -180,10 +180,12 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
 
     //fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
 
-    if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
-        //printf("EOF or leaf?!");
-        return NULL;
-    }
+    // if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
+    //     printf("EOF or leaf?!");
+    //     return NULL;
+    // }
+
+    fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
     
     // initialize QTNode
     QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly for THIS node
@@ -198,29 +200,21 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
 
     // internal node -> continue recursion
     if (type == 'N') { 
-        if (h == w) { // normal square -> recurse thru all 4 children
+        //printf("%dN!\t", k);
+        if (h == 1 && w > 1) { // single row -> child 3 and 4 NULL, recurse child 1 and 2
+            //printf("ROW!! h: %u \t w: %u \n", h, w);
+            root->children[0] = load_preorder_qt_helper(fp);
+            root->children[1] = load_preorder_qt_helper(fp);
+        } else if (w == 1 && h > 1) { // single column -> child 2 and 3 NULL, recurse child 1 and 4
+            //printf("COL!! h: %u \t w: %u \n", h, w);
+            root->children[0] = load_preorder_qt_helper(fp);
+            root->children[3] = load_preorder_qt_helper(fp);
+        } else { // normal square -> recurse thru all 4 children 
+            // printf("SQR!! h: %u \t w: %u \n", h, w);
             for (int j = 0; j < 4; j++) {
                 root->children[j] = load_preorder_qt_helper(fp);
             }
-        } else if (h == 1 && w > 1) { // single row
-            root->children[0] = load_preorder_qt_helper(fp);
-            root->children[1] = load_preorder_qt_helper(fp);
-        } else { // must be single column
-            root->children[0] = load_preorder_qt_helper(fp);
-            root->children[3] = load_preorder_qt_helper(fp);
         }
-        //printf("%dN!\t", k);
-        // if (h == 1 && w > 1) { // single row -> child 3 and 4 NULL, recurse child 1 and 2
-        //     root->children[0] = load_preorder_qt_helper(fp);
-        //     root->children[1] = load_preorder_qt_helper(fp);
-        // } else if (w == 1 && h > 1) { // single column -> child 2 and 3 NULL, recurse child 1 and 4
-        //     root->children[0] = load_preorder_qt_helper(fp);
-        //     root->children[3] = load_preorder_qt_helper(fp);
-        // } else { // normal square -> recurse thru all 4 children 
-        //     for (int j = 0; j < 4; j++) {
-        //         root->children[j] = load_preorder_qt_helper(fp);
-        //     }
-        // }
     }
 
     // always returns node regardless if it's an internal node or leaf
