@@ -255,7 +255,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
     fprintf(f_output, "%s", line);
 
     // after getting all our needed info, check for potential size incompatibility/error
-    printf("%d < %d\n", (8 * (secret_img->width * secret_img->height) + 16), (input_img->width * input_img->height));
+    //printf("%d < %d\n", (8 * (secret_img->width * secret_img->height) + 16), (input_img->width * input_img->height));
     if ((8 * (secret_img->width * secret_img->height) + 16) > (input_img->width * input_img->height)) {
         printf("failure!!");
         return 0; // failure!!
@@ -285,12 +285,13 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
     // encode the rest of the secret pixels
     for (unsigned int m = 0; m < (secret_img->width * secret_img->height); m++) {
         for (int n = 7; n >= 0; n--) {
-            unsigned int k = secrets[s++] & 1;
+            unsigned int k = (secrets[s] >> n) & 1;
             inputs[i] &= ~1; // clear the last bit
             inputs[i] |= k;// set the last bit
             fprintf(f_output, "%u %u %u\n", inputs[i], inputs[i], inputs[i]);
             i++;
         }
+        s++; // +1 done for a single intensity value
     }
 
     // copy the rest of the input file if there's still anything left
@@ -301,6 +302,9 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
 
     fclose(f_input);
     fclose(f_output);
+    
+    delete_image(secret_img);
+    delete_image(input_img);
 
     return 1; // success!!
 
@@ -435,6 +439,8 @@ void reveal_image(char *input_filename, char *output_filename) {
         }
         fprintf(fp, "%u %u %u \n", intensity, intensity, intensity);
     }
-    
+
+    delete_image(img);
+
     fclose(fp);
 }
