@@ -301,6 +301,9 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
         i++;
     }
 
+    fclose(f_input);
+    fclose(f_output);
+
     return 1; // success!!
 
     // // create read and write file handlers
@@ -435,6 +438,7 @@ void reveal_image(char *input_filename, char *output_filename) {
         fprintf(fp, "%u %u %u \n", intensity, intensity, intensity);
     }
     
+    fclose(fp);
 
     // FILE *f_input = fopen(input_filename, "r");
     // FILE *f_output = fopen(output_filename, "w");
