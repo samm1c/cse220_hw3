@@ -311,14 +311,14 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
         fscanf(f_secret, "%u %u %u ", &x, &y, &z); // x=y=z; assume x is the number you want to encode
         for (int j = 7; j >= 0; j--) {
             fscanf(f_input, "%u %u %u ", &r, &g, &b);
-            unsigned int k = (x >> i) & 1;
+            unsigned int k = (x >> j) & 1;
             r &= ~1;
             r |= k;
             fprintf(f_output, "%u %u %u\n", r, r, r); 
             //printf("k: %u r: %u\n", k, r);
         }
     }
-    //fprintf(f_output, "\n\n\nEND OF MSG:\n\n\n");
+    fprintf(f_output, "\n\n\nEND OF MSG:\n\n\n");
     // copy rest of input file if there is anything else left
     while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
         fprintf(f_output, "%u %u %u\n", r, g, b);
@@ -368,8 +368,9 @@ void reveal_image(char *input_filename, char *output_filename) {
             fscanf(f_input, "%u %u %u ", &r, &g, &b);
             unsigned int k = r & 1;
             intensity |= (k << j);
+            //printf("k: %u \t intensity: %u\n", k, intensity);
         }
-        printf("intensity: %u\n", intensity);
+        //printf("original r: %u \t intensity: %u\n", r, intensity);
         fprintf(f_output, "%u %u %u\n", intensity, intensity, intensity);
     }
 }
