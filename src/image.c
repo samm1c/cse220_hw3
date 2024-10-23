@@ -151,7 +151,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
             r &= ~(1); // clear the bit first
             r |= k; // add what we need (0 or 1)
             
-            printf("r: %d \t k: %u \t c: %c\n", r, k, c);
+            //printf("r: %d \t k: %u \t c: %c\n", r, k, c);
             fprintf(f_output, "%u %u %u\n", r, r, r);
         }
         //printf("r: %d \t c: %c\n", r, c);
@@ -176,7 +176,7 @@ unsigned int hide_message(char *message, char *input_filename, char *output_file
     fclose(f_input);
     fclose(f_output);
     
-    printf("lim: %u\n", lim);
+    //printf("lim: %u\n", lim);
     return lim; // return number of printable characters
 }
 
@@ -229,10 +229,92 @@ char *reveal_message(char *input_filename) {
 
 // image ->
 unsigned int hide_image(char *secret_image_filename, char *input_filename, char *output_filename) {
-    (void)secret_image_filename;
-    (void)input_filename;
-    (void)output_filename;
-    return 10;
+
+    // create read and write file handlers
+    FILE *f_secret = fopen(secret_image_filename, "r");
+    FILE *f_input = fopen(input_filename, "r");
+    FILE *f_output = fopen(output_filename, "w");
+    char line[256]; // buffer
+
+    // break down secret image info
+    unsigned int secret_w, secret_h;
+    for (int i = 0; i < 1; i++) { // skip first line and any comments
+        fgets(line, sizeof(line), f_secret);
+        if (line[0] == '#') {
+            i--;
+        }
+    }
+    fscanf(f_secret, "%u %u ", &secret_w, &secret_h);
+    fgets(line, sizeof(line), f_secret); // skip intensity
+
+    // copy header of input file -> output file
+    unsigned int input_w = 0, input_h = 0;
+    fgets(line, sizeof(line), f_input);
+    fprintf(f_output, "%s", line);
+    fgets(line, sizeof(line), f_input);
+    while (line[0] == '#') { // comment -> reiterate
+        fgets(line, sizeof(line), f_input); // keep skipping lines
+    }
+    // copy and get input width and height
+    printf("LINE: %s\n", line);
+    sscanf(line, "%u %u ", &input_w, &input_h);
+    fprintf(f_output, "%s", line);
+    // copy rest (intensity)
+    fgets(line, sizeof(line), f_input);
+    fprintf(f_output, "%s", line);
+
+    // after getting all our needed info, check for potential size incompatibility/error
+    printf("%d < %d\n", (8 * (secret_w * secret_h) + 16), (input_w * input_h));
+    if ((8 * (secret_w * secret_h) + 16) > (input_w * input_h)) {
+        printf("failure!!");
+        return 0; // failure!!
+    }
+
+    // first 8 pixels of output -> secret width
+    unsigned int r, g, b;
+    for (int i = 7; i >= 0; i--) {
+        fscanf(f_input, "%u %u %u ", &r, &g, &b);
+
+        unsigned int k = (secret_w >> i) & 1; // bit to insert; & 1 -> only want the last, ignore rest
+
+        r &= ~1; // clear the last bit
+        r |= k;// set the last bit
+
+        fprintf(f_output, "%u %u %u\n", r, r, r);
+        printf("k: %u r: %u\n", k, r);
+    }
+
+    // next 8 pixels of output -> secret height
+    for (int i = 7; i >= 0; i--) {
+        fscanf(f_input, "%u %u %u ", &r, &g, &b);
+
+        unsigned int k = (secret_h >> i) & 1;
+
+        r &= ~1;
+        r |= k;
+
+        fprintf(f_output, "%u %u %u\n", r, r, r); 
+    }
+
+    // rest of secret pixels (w * h) -> secret intensities!! (8 again per pixel)
+    unsigned int x, y, z; // rgb for secret image
+    for (unsigned int i = 0; i < (secret_w * secret_h); i++) {
+        fscanf(f_secret, "%u %u %u", &x, &y, &z); // x=y=z; assume x is the number you want to encode
+        for (int j = 7; j >= 0; j--) {
+            fscanf(f_input, "%u %u %u ", &r, &g, &b);
+            unsigned int k = (x >> i) & 1;
+            r &= ~1;
+            r |= k;
+            fprintf(f_output, "%u %u %u\n", r, r, r); 
+        }
+    }
+
+    // copy rest of input file if there is anything else left
+    while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
+        fprintf(f_output, "%u %u %u\n", r, g, b);
+    }
+
+    return 1; // success!
 }
 
 void reveal_image(char *input_filename, char *output_filename) {
