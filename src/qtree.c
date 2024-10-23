@@ -165,7 +165,6 @@ QTNode *load_preorder_qt(char *filename) {
 
     // use helper function to perform recursion
     QTNode *root = load_preorder_qt_helper(fp);
-    //printf("size: %ld\n", sizeof(root));
 
     // close file handler
     fclose(fp);
@@ -178,7 +177,6 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
     // variables
     char type; // type of node
     unsigned int i, r, h, c, w;
-    QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly for THIS node
 
     //fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
 
@@ -186,8 +184,9 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
         //printf("EOF or leaf?!");
         return NULL;
     }
-
+    
     // initialize QTNode
+    QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly for THIS node
     root->intensity = i;
     root->row = r;
     root->height = h;
