@@ -318,7 +318,7 @@ unsigned int hide_image(char *secret_image_filename, char *input_filename, char 
             //printf("k: %u r: %u\n", k, r);
         }
     }
-    fprintf(f_output, "\n\n\nEND OF MSG:\n\n\n");
+    //fprintf(f_output, "\n\n\nEND OF MSG:\n\n\n");
     // copy rest of input file if there is anything else left
     while (fscanf(f_input, "%u %u %u ", &r, &g, &b) == 3) {
         fprintf(f_output, "%u %u %u\n", r, g, b);
