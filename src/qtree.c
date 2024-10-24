@@ -40,8 +40,6 @@ QTNode *create_quadtree_helper(Image *image, unsigned int r, unsigned int c, uns
     root->col = c;
     root->height = h;
     root->width = w;
-    //printf("row: %u, col: %u, height: %u, width: %u\n", r, c, h, w);
-    //printf("Average: %f, RMSE: %f\n", average, RMSE);
     
     if (RMSE <= max_rmse || (h == 1 && w == 1)) { // base case -> leaf node
         //printf("leaf node!\n");
@@ -129,9 +127,9 @@ void save_qtree_as_ppm(QTNode *root, char *filename) {
     }
 
     // FREE 2D ARRAY 
-    for (unsigned int i = 0; i < (root->height); i++) { // deallocate each row
+    for (unsigned int i = 0; i < root->height; i++) { // deallocate each row
             free(pixels[i]);
-        }
+    }
     free(pixels); // deallocate 2D reference
 
     // close file handler
@@ -178,17 +176,9 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
     char type; // type of node
     unsigned int i, r, h, c, w;
 
-    //fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
-
-    // if (fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w) != 6) { // base case -> stores variables while checking if EOF
-    //     printf("EOF or leaf?!");
-    //     return NULL;
-    // }
-
-    fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
-    
     // initialize QTNode
     QTNode *root = malloc(sizeof(QTNode)); // allocate memory accordingly for THIS node
+    fscanf(fp, "%c %u %u %u %u %u ", &type, &i, &r, &h, &c, &w);
     root->intensity = i;
     root->row = r;
     root->height = h;
@@ -200,7 +190,7 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
 
     // internal node -> continue recursion
     if (type == 'N') { 
-        //printf("%dN!\t", k);
+        //printf("N!\t");
         if (h == 1 && w > 1) { // single row -> child 3 and 4 NULL, recurse child 1 and 2
             //printf("ROW!! h: %u \t w: %u \n", h, w);
             root->children[0] = load_preorder_qt_helper(fp);
@@ -237,7 +227,6 @@ void save_preorder_qt_helper(QTNode *root, FILE *fp) {
     if (root == NULL) { // base case -> do nothing
         return;
     }
-    //printf("bruh");
     if ((root->children[0] == NULL) && (root->children[1] == NULL) && (root->children[2] == NULL) && (root->children[3] == NULL)) { // leaf node!
         fprintf(fp, "L %u %u %u %u %u\n", root->intensity, root->row, root->height, root->col, root->width);
     } else { // internal node! -> recurse through children
@@ -246,6 +235,5 @@ void save_preorder_qt_helper(QTNode *root, FILE *fp) {
             save_preorder_qt_helper(root->children[i], fp);
         }
     }
-
 }
 
