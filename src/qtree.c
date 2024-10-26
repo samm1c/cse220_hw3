@@ -201,8 +201,8 @@ QTNode *load_preorder_qt_helper(FILE *fp) {
             //printf("COL!! h: %u \t w: %u \n", h, w);
             root->children[0] = load_preorder_qt_helper(fp);
             root->children[1] = NULL;
-            root->children[2] = NULL;
-            root->children[3] = load_preorder_qt_helper(fp);
+            root->children[2] = load_preorder_qt_helper(fp);
+            root->children[3] = NULL;
         } else { // normal square -> recurse thru all 4 children 
             // printf("SQR!! h: %u \t w: %u \n", h, w);
             for (int j = 0; j < 4; j++) {
